@@ -13,6 +13,7 @@ import Parameters from "metabase/parameters/components/Parameters";
 import ParameterSidebar from "metabase/parameters/components/ParameterSidebar";
 import SharingSidebar from "metabase/sharing/components/SharingSidebar";
 import EmptyState from "metabase/components/EmptyState";
+import { AddCardSidebar } from "./add-card-sidebar/AddCardSidebar";
 
 import DashboardControls from "../hoc/DashboardControls";
 
@@ -228,6 +229,12 @@ export default class Dashboard extends Component {
     });
   };
 
+  onToggleAddQuestionSidebar = () => {
+    this.setState(prev => ({
+      showAddQuestionSidebar: !prev.showAddQuestionSidebar,
+    }));
+  };
+
   onCancel = () => {
     this.props.setSharing(false);
   };
@@ -304,6 +311,7 @@ export default class Dashboard extends Component {
                 parametersWidget={parametersWidget}
                 onSharingClick={this.onSharingClick}
                 onEmbeddingClick={this.onEmbeddingClick}
+                onToggleAddQuestionSidebar={this.onToggleAddQuestionSidebar}
               />
             </header>
             <div
@@ -336,7 +344,11 @@ export default class Dashboard extends Component {
                   )}
                 </div>
               </div>
-              <Sidebars {...this.props} onCancel={this.onCancel} />
+              <Sidebars
+                {...this.props}
+                onCancel={this.onCancel}
+                showAddQuestionSidebar={this.state.showAddQuestionSidebar}
+              />
             </div>
           </div>
         )}
@@ -351,8 +363,10 @@ function Sidebars(props) {
     parameters,
     showAddParameterPopover,
     removeParameter,
+    addCardToDashboard,
     editingParameter,
     isEditingParameter,
+    showAddQuestionSidebar,
     clickBehaviorSidebarDashcard,
     onReplaceAllDashCardVisualizationSettings,
     onUpdateDashCardVisualizationSettings,
@@ -369,6 +383,21 @@ function Sidebars(props) {
     isFullscreen,
     onCancel,
   } = props;
+
+  if (showAddQuestionSidebar) {
+    return (
+      <AddCardSidebar
+        initialCollection={dashboard.collection_id}
+        onSelect={cardId => {
+          addCardToDashboard({
+            dashId: dashboard.id,
+            cardId: cardId,
+          });
+        }}
+      />
+    );
+  }
+
   if (clickBehaviorSidebarDashcard) {
     return (
       <ClickBehaviorSidebar

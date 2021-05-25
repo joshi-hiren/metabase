@@ -201,22 +201,13 @@ export default class DashboardHeader extends Component {
 
     if (isEditing) {
       buttons.push(
-        <ModalWithTrigger
-          key="add-a-question"
-          ref={this.addQuestionModal}
-          triggerElement={
-            <Tooltip tooltip={t`Add question`}>
-              <Icon name="add" data-metabase-event="Dashboard;Add Card Modal" />
-            </Tooltip>
-          }
-        >
-          <AddToDashSelectQuestionModal
-            dashboard={dashboard}
-            addCardToDashboard={this.props.addCardToDashboard}
-            onEditingChange={this.props.onEditingChange}
-            onClose={() => this.addQuestionModal.current.toggle()}
+        <Tooltip tooltip={t`Add question`}>
+          <Icon
+            name="add"
+            data-metabase-event="Dashboard;Add Card Modal"
+            onClick={() => this.props.onToggleAddQuestionSidebar()}
           />
-        </ModalWithTrigger>,
+        </Tooltip>,
       );
 
       // Add text card button
