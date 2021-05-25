@@ -43,7 +43,7 @@
 
 (deftest fully-qualified-name->context-test
   (testing "fully-qualified-name->context works as expected"
-    (testing "with cards in root and in a collection"
+    (testing " with cards in root and in a collection"
       (mt/with-temp* [Collection [{collection-id :id} {:name "A Collection"}]
                       Card       [root-card {:name "Root Card"}]
                       Card       [collection-card {:name         "Collection Card"
@@ -52,7 +52,7 @@
               card2-name "/collections/root/collections/A Collection/cards/Collection Card"]
           (is (= card1-name (names/fully-qualified-name root-card)))
           (is (= card2-name (names/fully-qualified-name collection-card))))))
-    (testing "with snippets in a collection"
+    (testing " with snippets in a collection"
       (mt/with-temp* [Collection [{base-collection-id :id} {:name "Base Collection"
                                                             :namespace "snippets"}]
                       Collection [{collection-id :id}      {:name "Nested Collection"
@@ -68,4 +68,16 @@
                   (names/fully-qualified-name snippet)))
            (is (= {:collection collection-id
                    :snippet    (u/the-id snippet)}
-                  (names/fully-qualified-name->context fully-qualified-name))))))))
+                  (names/fully-qualified-name->context fully-qualified-name))))))
+    (testing " with path elements matching one of our entity names"
+      ; these drivers keep table names lowercased, causing "users" table to clash with our entity name "users"
+      (mt/test-drivers #{:postgres :mysql}
+        (ts/with-world
+          (let [users-pk-field (Field users-pk-field-id)
+                fq-name        (names/fully-qualified-name users-pk-field)
+                ctx            (names/fully-qualified-name->context fq-name)]
+            ;; MySQL doesn't have schemas, so either one of these could be acceptable
+            (is (contains? #{"/databases/Fingerprint test-data copy/tables/users/fields/id"
+                             "/databases/Fingerprint test-data copy/schemas/public/tables/users/fields/id"} fq-name))
+            (is (map? ctx))
+            (is (some? (:table ctx)))))))))
